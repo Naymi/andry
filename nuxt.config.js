@@ -1,9 +1,32 @@
 import VuetifyLoaderPlugin from 'vuetify-loader/lib/plugin'
 import pkg from './package'
+import axios from 'axios'
 const fs = require('fs')
 export default {
   generate: {
-    routes: ['/item/kinematic']
+    async routes() {
+      try {
+        const e = await axios.get(
+          'https://otchtest.000webhostapp.com/api/show.php'
+        )
+        return e.data.reduce((acc, item) => {
+          acc.push(
+            {
+              route: `/${item.slug}`,
+              payload: item
+            },
+            {
+              route: `/${item.slug}/edit`,
+              payload: item
+            }
+          )
+          return acc
+        }, [])
+      } catch (e) {
+        console.log('e :', e)
+        return []
+      }
+    }
   },
   mode: 'universal',
 
@@ -30,7 +53,7 @@ export default {
   /*
    ** Customize the progress-bar color
    */
-  loading: { color: '#fff' },
+  loading: { color: 'blue' },
 
   /*
    ** Global CSS
@@ -43,7 +66,7 @@ export default {
   plugins: ['@/plugins/vuetify'],
 
   proxy: {
-    '/api/': 'http://otchtest.000webhostapp.com',
+    '/api/': 'http://otchtest.000webhostapp.com'
   },
 
   /*

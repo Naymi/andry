@@ -1,20 +1,19 @@
 <template>
   <div class="main">
     <v-layout light wrap>
+      <div>
+        <v-text-field label="Название" v-model="title"/>
+        <v-text-field label="Имя в url(slug)" v-model="slug"/>
+      </div>
       <v-flex md12>
-        <!-- <v-card>
-          <no-ssr>
-            <vue-trix v-model="content"></vue-trix>
-          </no-ssr>
-        </v-card>0-->
         <no-ssr>
           <vue-editor v-model="content"></vue-editor>
         </no-ssr>
       </v-flex>
-      <v-btn @click="save">Сохранить</v-btn>
-      <v-btn @click="showContent = !showContent">Показать отренедеренное</v-btn>
+      <v-btn @click="showhtml = !showhtml">show html</v-btn>
+      <v-btn @click="save">Спасти и добавить</v-btn>
       <br>
-      <v-flex v-if="showContent">{{content}}</v-flex>
+      <v-flex v-if="showhtml">{{content}}</v-flex>
     </v-layout>
   </div>
 </template>
@@ -29,24 +28,28 @@ export default {
   components,
   methods: {
     save() {
+      if (/[\/]/.test(this.title)) {
+        return alert('Некорректные символы в тайтле')
+      }
       this.$axios({
         method: 'POST',
         url: '/api/add.php',
-        params: {
+        data: {
+          content: this.content,
           slug: this.slug,
-          content: this.content
+          title: this.title,
+          id: this.id
         }
       })
-        .then(e =>
-          e.data === 'succesfull' ? alert('Сохранено') : alert('error')
-        )
-        .catch(e => alert('error(9('))
     }
   },
   data() {
     return {
+      showhtml: false,
+      slug: this.$route.params.post,
       content: '',
-      showContent: false
+      slug: '',
+      title: ''
     }
   }
 }
