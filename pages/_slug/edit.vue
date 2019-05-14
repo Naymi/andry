@@ -10,12 +10,17 @@
           <vue-editor v-model="content"></vue-editor>
         </no-ssr>
       </v-flex>
+      <div v-if="process">
+        Ожидание ответа
+        <v-progress-circular size="50" indeterminate color="red"></v-progress-circular>
+      </div>
       <v-btn @click="showhtml = !showhtml">show html</v-btn>
-      <v-btn @click="save">Спасти и Сохранить</v-btn>
+      <v-btn :disabled="process" @click="save">Спасти и Сохранить</v-btn>
       <v-btn :to="itemUrl">Перейти к посту</v-btn>
-      <br>
-      <v-flex v-if="showhtml">{{content}}</v-flex>
     </v-layout>
+    <br>
+    <v-alert :type='alert.type' v-model="alert.visible">{{alert.text}}</v-alert>
+    <v-flex v-if="showhtml">{{content}}</v-flex>
   </div>
 </template>
 
@@ -37,9 +42,7 @@ export default {
         slug: route.params.slug
       }
     })
-    console.log('tmp :', tmp.data)
     const { content, slug, id, title } = tmp.data
-    console.log('content :', content)
     return {
       content,
       slug,
@@ -48,9 +51,9 @@ export default {
     }
   },
   computed: {
-    itemUrl() {
-      return `/${this.slug}`
-    }
+    process() {
+      return this.$store.state.process.process
+    },
   },
   components,
   methods: {
@@ -58,26 +61,47 @@ export default {
       if (/[\/]/.test(this.title)) {
         return alert('Некорректные символы в тайтле')
       }
+      if (/[\/]/.test(this.slug)) {
+        return alert('Некорректные символы в тайтле')
+      }
       let slug = this.slug
+      this.$store.commit('process/processOn')
       this.$axios({
         method: 'POST',
         url: '/api/update.php',
         data: {
           content: this.content,
-          slug: this.slug,
+          slug,
           title: this.title,
           id: this.id
         }
-      }).then(e => {
-        this.itemUrl = this.$route.params.post + slug
       })
+        .then(e => {
+          this.$store.commit('process/processOff')
+          this.itemUrl = '/' + slug
+          this.alert.type = 'success'
+          this.alert.text = 'Сохранение успешно'
+          this.alert.visible = true
+        })
+        .catch(() => {
+          this.$store.commit('process/processOff')
+          this.alert.text = 'Произошла ошибка'
+          this.alert.type = 'error'
+          this.alert.visible = true
+        })
     }
   },
   data() {
     return {
-      itemUrl: '/item/' + this.$route.params.post,
+      alert: {
+        type: '',
+        visible: false,
+        text: ''
+      },
+      processStatus: false,
+      itemUrl: '/' + this.$route.params.slug,
       showhtml: false,
-      slug: this.$route.params.post
+      slug: this.$route.params.slug
     }
   }
 }

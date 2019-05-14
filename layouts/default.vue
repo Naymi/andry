@@ -60,7 +60,6 @@
       </div>
       <v-btn :to="this.$route.fullPath+'/edit'">Изменить текст</v-btn>
       <v-btn @click="remove" v-if='postId'>Удалить</v-btn>
-      <v-btn @click="down">test</v-btn>
     </v-navigation-drawer>
   </v-app>
 </template>
