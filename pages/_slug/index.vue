@@ -6,6 +6,8 @@
       :style="`font-size:${fz}px; text-align:justify; background: ${back}; color: ${textColor}`"
       v-html="post.content"
     ></div>
+    <v-btn @click="getQuest">Показать вопросы</v-btn>
+    <quests v-if="quests" :disabled="showAnswer" :quests="quests"/>
   </section>
 </template>
 
@@ -25,10 +27,14 @@
 
 <script>
 import axios from 'axios'
+import quests from '~/components/quests'
 export default {
-  created () {
-    this.$store.commit('post/updateId', this.post.id);
-    console.log('id',this.$store.getters['post/getId'])
+  components: {
+    quests
+  },
+  created() {
+    this.$store.commit('post/updateId', this.post.id)
+    console.log('id', this.$store.getters['post/getId'])
   },
   computed: {
     fz: {
@@ -63,6 +69,22 @@ export default {
     }
   },
   methods: {
+    checkAnswer() {},
+    setAnswers(v) {
+      this.answers = v
+    },
+    getQuest() {
+      this.$axios({
+        url: '/api/getQuests.php',
+        method: 'GET',
+        params: {
+          id: this.post.id
+        }
+      }).then(({ data }) => {
+        console.log('data :', data)
+        this.quests = data
+      })
+    },
     download() {
       this.$axios({
         method: 'POST',
@@ -94,6 +116,12 @@ export default {
     }
     return {
       post: result
+    }
+  },
+  data() {
+    return {
+      showAnswer: false,
+      quests: false
     }
   }
 }
