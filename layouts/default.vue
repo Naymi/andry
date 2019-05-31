@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <login v-model="login" @ok="testPass"/>
     <v-navigation-drawer v-model="drawer" fixed app>
       <v-list>
         <v-list-tile v-for="(item, i) in items" :key="i" :to="item.to" router exact>
@@ -21,7 +22,7 @@
             </v-list-tile-title>
           </v-list-tile>
           <v-list-tile nuxt :to="`/${i.slug}`" v-for="i in posts" :key="i.slug">{{i.title}}</v-list-tile>
-          <v-list-tile nuxt to="/add">Добавить</v-list-tile>
+          <!-- <v-list-tile nuxt to="/add">Добавить</v-list-tile> -->
         </v-list>
       </v-list>
     </v-navigation-drawer>
@@ -58,14 +59,18 @@
           <input type="color" v-model="back">
         </label>
       </div>
-      <v-btn :to="this.$route.fullPath+'/edit'">Изменить текст</v-btn>
-      <v-btn @click="remove" v-if='postId'>Удалить</v-btn>
+      <v-btn @click="changePost">Изменить текст</v-btn>
+      <!-- <v-btn @click="remove" v-if="postId">Удалить</v-btn> -->
     </v-navigation-drawer>
   </v-app>
 </template>
 
 <script>
+import login from '~/components/aproved'
 export default {
+  components: {
+    login
+  },
   created() {
     this.$axios
       .$get('/api/show.php')
@@ -76,6 +81,25 @@ export default {
       .catch(e => console.log('e :', e))
   },
   methods: {
+    testPass(v) {
+      if (v === 'оченьСложныйПароль') {
+        this.isLogin = true
+        this.$store.commit('user/setLogin', true)
+        this.$store.commit('user/setPass', 'оченьСложныйПароль')
+        this.changePost()
+      } else {
+        alert('Пароль неверен')
+      }
+    },
+    changePost() {
+      if (this.isLogin) {
+        this.$router.push(this.$route.fullPath + '/edit')
+        this.login = false
+      } else {
+        this.rightDrawer = false
+        this.login = true
+      }
+    },
     down() {
       let posts
       this.$axios
@@ -87,6 +111,9 @@ export default {
         .catch(e => console.log('e :', e))
     },
     remove() {
+      if (!this.isLogin) {
+        return
+      }
       this.$axios({
         url: '/api/delete.php',
         method: 'POST',
@@ -95,7 +122,7 @@ export default {
         },
         params: {
           id: this.postId
-        },
+        }
       }).then(e => {
         alert('Удаление успешено')
         this.$router.push('/')
@@ -103,7 +130,7 @@ export default {
     }
   },
   computed: {
-    postId(){
+    postId() {
       return this.$store.getters['post/getId']
     },
     fz: {
@@ -139,6 +166,7 @@ export default {
   },
   data() {
     return {
+      isLogin: false,
       posts: [],
       clipped: false,
       drawer: false,

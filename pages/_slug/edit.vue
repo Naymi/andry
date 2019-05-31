@@ -19,7 +19,7 @@
       <v-btn :to="itemUrl">Перейти к посту</v-btn>
     </v-layout>
     <br>
-    <v-alert :type='alert.type' v-model="alert.visible">{{alert.text}}</v-alert>
+    <v-alert :type="alert.type" v-model="alert.visible">{{alert.text}}</v-alert>
     <v-flex v-if="showhtml">{{content}}</v-flex>
   </div>
 </template>
@@ -53,7 +53,7 @@ export default {
   computed: {
     process() {
       return this.$store.state.process.process
-    },
+    }
   },
   components,
   methods: {
@@ -65,6 +65,17 @@ export default {
         return alert('Некорректные символы в тайтле')
       }
       let slug = this.slug
+      console.log(
+        'this.$store.state.user.isLogin :',
+        this.$store.state.user.isLogin
+      )
+      if (!this.$store.state.user.isLogin) {
+        alert(
+          'Вы не авторизованы, сейчас произойдёт переадресация на страницу поста'
+        )
+        this.$router.push(String('/' + this.$route.params.slug))
+        return
+      }
       this.$store.commit('process/processOn')
       this.$axios({
         method: 'POST',

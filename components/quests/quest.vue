@@ -2,7 +2,7 @@
   <div class="quest">
     <div class="quest__title">{{quest.title}}</div>
     <v-layout>
-      <v-flex v-for="a in quest.answers" :key="a.id">
+      <v-flex md4 xs12 v-for="a in quest.answers" :key="a.id">
         <v-card :color="style(a)">
           <v-checkbox :disabled="disabled" :label="a.title" @change="v=>pushAnswer({v:v,a:a})"/>
         </v-card>
@@ -26,7 +26,6 @@ export default {
   },
   methods: {
     style(a) {
-      console.log('a :', a)
       return this.showAnswer && this.answers.find(i => i === a.id)
         ? `${a.value ? 'success' : 'error'}`
         : ''

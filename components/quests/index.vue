@@ -11,7 +11,7 @@
       />
     </div>
 
-    <v-btn @click="showAnswer=true;">Проверить</v-btn>
+    <v-btn @click="showAnswer=true;disabled=true">Проверить</v-btn>
   </div>
 </template>
 
